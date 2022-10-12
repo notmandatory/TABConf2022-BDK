@@ -71,45 +71,46 @@ October 12, 10:30am - 4:45pm
    ALICE_BIP86_XPUB=`bdk-cli key derive --path "m/86'/1'/0'" --xprv $ALICE_MASTER_XPRV | jq ".xpub" | tr -d '"*'`
    UNSPENDABLE_KEY=020000000000000000000000000000000000000000000000000000000000000001
    ```
-9. Create shared public key P2TR descriptor:
-   ```shell
-   SHARED_EXT_DESC="tr($UNSPENDABLE_KEY,multi_a(2,${ALICE_BIP86_XPUB:0:-1}/0/*,${BOB_BIP86_XPUB:0:-1}/0/*,${CAROL_BIP86_XPUB:0:-1}/0/*))"
-   ```
-10. Create Alice's private key P2TR descriptor:
+9. Team up with two others and share your <NAME>_BIP86_XPUB values, in this example BOB_BIP86_XPUB and CAROL_BIP86_XPUB.
+10. Create shared public key P2TR descriptor:
+    ```shell
+    SHARED_EXT_DESC="tr($UNSPENDABLE_KEY,multi_a(2,${ALICE_BIP86_XPUB:0:-1}/0/*,${BOB_BIP86_XPUB:0:-1}/0/*,${CAROL_BIP86_XPUB:0:-1}/0/*))"
+    ```
+11. Create Alice's private key P2TR descriptor:
     ```shell
     ALICE_EXT_DESC="tr($UNSPENDABLE_KEY,multi_a(2,${ALICE_BIP86_XPRV:0:-1}/0/*,${BOB_BIP86_XPUB:0:-1}/0/*,${CAROL_BIP86_XPUB:0:-1}/0/*))"
     ```
-11. Sync shared wallet and get new receive address:
+12. Sync shared wallet and get new receive address:
    ```shell
    bdk-cli wallet -d $SHARED_EXT_DESC sync
    bdk-cli wallet -d $SHARED_EXT_DESC get_new_address
    ```
-12. Send testnet bitcoin from [faucet](https://bitcoinfaucet.uo1.net/) to new address.
-13. Verify transaction in [mempool](https://mempool.space/testnet).
-14. Verify untrusted pending balance with wallet:
+13. Send testnet bitcoin from [faucet](https://bitcoinfaucet.uo1.net/) to new address.
+14. Verify transaction in [mempool](https://mempool.space/testnet).
+15. Verify untrusted pending balance with wallet:
    ```shell
    bdk-cli wallet -d $SHARED_EXT_DESC sync
    bdk-cli wallet -d $SHARED_EXT_DESC get_balance
    ```
-15. Wait for transaction confirmation.
-16. Verify confirmed balance with wallet:
+16. Wait for transaction confirmation.
+17. Verify confirmed balance with wallet:
    ```shell
    bdk-cli wallet -d $SHARED_EXT_DESC sync
    bdk-cli wallet -d $SHARED_EXT_DESC get_balance
    ```
-17. Create unsigned PSBT for spending transaction with op_return:
+18. Create unsigned PSBT for spending transaction with op_return:
     ```shell
     MESSAGE="TABConf2022 alice, bob, carol"
     UNSIGNED_PSBT=`bdk-cli wallet -d $SHARED_EXT_DESC create_tx --enable_rbf --fee_rate 2 --send_all --add_string $MESSAGE --to "tb1ql7w62elx9ucw4pj5lgw4l028hmuw80sndtntxt:0" | jq ".psbt" | tr -d '"'`
     ```
-18. Alice, Bob, and Carol create PSBTs with their signatures:
+19. Alice, Bob, and Carol create PSBTs with their signatures:
     ```shell
     bdk-cli wallet -d $SHARED_EXT_DESC sync
     ALICE_SIGNED_PSBT=`bdk-cli wallet -d $ALICE_EXT_DESC sign --psbt $UNSIGNED_PSBT | jq ".psbt" | tr -d '"'`
     BOB_SIGNED_PSBT=`bdk-cli wallet -d $BOB_EXT_DESC sign --psbt $UNSIGNED_PSBT | jq ".psbt" | tr -d '"'`
     CAROL_SIGNED_PSBT=`bdk-cli wallet -d $CAROL_EXT_DESC sign --psbt $UNSIGNED_PSBT | jq ".psbt" | tr -d '"'`
     ```
-19. Combine signed PSBTs and broadcast finalized transaction
+20. Combine signed PSBTs and broadcast finalized transaction
    ```shell
    SIGNED_PSBT=`bdk-cli wallet -d $SHARED_EXT_DESC combine_psbt --psbt $ALICE_SIGNED_PSBT --psbt $BOB_SIGNED_PSBT --psbt $CAROL_SIGNED_PSBT | jq ".psbt" | tr -d '"'`
    FINALIZED_PSBT=`bdk-cli wallet -d $SHARED_EXT_DESC finalize_psbt --psbt $SIGNED_PSBT | jq ".psbt" | tr -d '"'`
@@ -121,4 +122,5 @@ October 12, 10:30am - 4:45pm
 * ["MuSig2: Simple Two-Round Schnorr Multi-Signatures”, Nick, Ruffing, and Seurin"](https://eprint.iacr.org/2020/1261)
 * [BIP-??? MuSig2](https://github.com/jonasnick/bips/blob/musig2/bip-musig2.mediawiki)
 * An easy way to create or use default unspendable key spend key?
+* Update to fix max_satisfaction_weight eg. [rust-miniscript #476](https://github.com/rust-bitcoin/rust-miniscript/pull/476)
    
