@@ -99,8 +99,8 @@ October 12, 10:30am - 4:45pm
    ```
 17. Create unsigned PSBT for spending transaction with op_return:
     ```shell
-    MESSAGE=`echo "TABConf2022 alice, bob, carol" | base64`
-    UNSIGNED_PSBT=`bdk-cli wallet -d $SHARED_EXT_DESC create_tx --enable_rbf --fee_rate 2 --send_all --add_data $MESSAGE --to "tb1ql7w62elx9ucw4pj5lgw4l028hmuw80sndtntxt:0" | jq ".psbt" | tr -d '"'`
+    MESSAGE="TABConf2022 alice, bob, carol"
+    UNSIGNED_PSBT=`bdk-cli wallet -d $SHARED_EXT_DESC create_tx --enable_rbf --fee_rate 2 --send_all --add_string $MESSAGE --to "tb1ql7w62elx9ucw4pj5lgw4l028hmuw80sndtntxt:0" | jq ".psbt" | tr -d '"'`
     ```
 18. Alice, Bob, and Carol create PSBTs with their signatures:
     ```shell
